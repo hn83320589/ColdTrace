@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router';
-import { taipeiMonthOf } from '@coldtrace/shared';
+import { isCountedExcursion, taipeiMonthOf } from '@coldtrace/shared';
 import { api } from '../api';
 import { EventBadge } from '../components/StatusBadge';
 import {
@@ -84,7 +84,7 @@ export function ReportsPage() {
                     <td className={`num ${(c.complianceRate ?? 1) < 0.99 ? 'warn' : ''}`}>
                       {formatPercent(c.complianceRate)}
                     </td>
-                    <td className="num">{c.events.filter((e) => e.type === 'EXCURSION').length}</td>
+                    <td className="num">{c.events.filter(isCountedExcursion).length}</td>
                     <td className="num">{c.events.filter((e) => e.type === 'OFFLINE').length}</td>
                   </tr>
                 ))}

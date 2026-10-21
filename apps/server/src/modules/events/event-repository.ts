@@ -61,12 +61,12 @@ export class EventRepository {
     return get<EventRow>(this.db, 'SELECT * FROM events WHERE id = ?', [id]);
   }
 
-  /** 與 [from, to] 時間重疊、未被合併的溫度異常事件 */
+  /** 與 [from, to] 時間重疊、未被合併或撤銷的溫度異常事件 */
   findExcursionsOverlapping(cabinetId: string, from: number, to: number): EventRow[] {
     return all<EventRow>(
       this.db,
       `SELECT * FROM events
-       WHERE cabinet_id = ? AND type = 'EXCURSION' AND status != 'MERGED'
+       WHERE cabinet_id = ? AND type = 'EXCURSION' AND status NOT IN ('MERGED', 'RETRACTED')
          AND started_at <= ? AND COALESCE(ended_at, 9e18) >= ?
        ORDER BY started_at, id`,
       [cabinetId, to, from],
@@ -142,6 +142,12 @@ export class EventRepository {
       [primaryId, mergedId],
     );
     run(this.db, 'DELETE FROM event_links WHERE excursion_event_id = ?', [mergedId]);
+  }
+
+  /** 撤銷溫度異常事件並解除與斷線事件的關聯（斷線事件會在 afterIngest 重新判定） */
+  retractExcursion(id: number): void {
+    run(this.db, `UPDATE events SET status = 'RETRACTED' WHERE id = ?`, [id]);
+    run(this.db, 'DELETE FROM event_links WHERE excursion_event_id = ?', [id]);
   }
 
   linkedEventIds(row: EventRow): number[] {

@@ -75,6 +75,16 @@ export class OfflineService implements AfterIngestHook {
     );
     for (const { id } of overlapping) toAssess.add(id);
 
+    // 關聯的異常事件被撤銷後，「補傳顯示超標」已失去依據，需要重新判定
+    const orphaned = all<{ id: number }>(
+      this.db,
+      `SELECT id FROM events
+       WHERE cabinet_id = ? AND type = 'OFFLINE' AND status = 'BACKFILLED_EXCURSION'
+         AND NOT EXISTS (SELECT 1 FROM event_links WHERE offline_event_id = events.id)`,
+      [cabinetId],
+    );
+    for (const { id } of orphaned) toAssess.add(id);
+
     for (const id of toAssess) {
       const event = this.events.findById(id);
       if (event) this.assess(event, now, out);

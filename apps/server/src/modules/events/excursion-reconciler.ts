@@ -64,16 +64,37 @@ export class ExcursionReconciler {
       [cabinetId, windowFrom, windowTo],
     );
     const runs = detectExcursionRuns(samples).filter((r) => r.established);
-    if (runs.length === 0) return;
-
     const existing = this.events.findExcursionsOverlapping(cabinetId, windowFrom, windowTo);
-    for (const run of runs) {
-      // 既有事件的開始時間一定是一筆超標讀值，因此恰好屬於一個連續段
-      const matches = existing.filter(
-        (e) => e.started_at >= run.start && e.started_at <= run.lastOutAt,
+
+    // ① 既有事件的開始時間一定是一筆超標讀值，因此恰好屬於一個連續段
+    const matchesByRun = runs.map((run) =>
+      existing.filter((e) => e.started_at >= run.start && e.started_at <= run.lastOutAt),
+    );
+
+    // ② 開始時間落在視窗內、卻不屬於任何成立連續段的事件：補傳的正常讀值把它切短了。
+    //    與尚無事件的成立段重疊就由該段承接（保留事件、處置與已發通知），否則撤銷
+    const claimed = new Set(matchesByRun.flat().map((e) => e.id));
+    const orphans = existing.filter(
+      (e) => !claimed.has(e.id) && e.started_at >= windowFrom && e.started_at <= windowTo,
+    );
+    runs.forEach((run, i) => {
+      if (matchesByRun[i]!.length > 0) return;
+      const index = orphans.findIndex(
+        (e) =>
+          e.started_at <= run.lastOutAt && (e.ended_at ?? Number.MAX_SAFE_INTEGER) >= run.start,
       );
-      this.apply(cabinetId, run, matches, now, out);
-    }
+      if (index >= 0) matchesByRun[i] = orphans.splice(index, 1);
+    });
+
+    runs.forEach((run, i) => this.apply(cabinetId, run, matchesByRun[i]!, now, out));
+    for (const orphan of orphans) this.retract(cabinetId, orphan, now, out);
+  }
+
+  /** 資料顯示這段超標其實不足 10 分鐘：保留紀錄供稽核，標記為已撤銷並通知 */
+  private retract(cabinetId: string, event: EventRow, now: number, out: WsMessage[]): void {
+    this.events.retractExcursion(event.id);
+    this.notify(event.id, 'EXCURSION_RETRACTED', this.retractedMessage(cabinetId, event), now, out);
+    this.publish(event.id, now, out);
   }
 
   private apply(
@@ -114,7 +135,7 @@ export class ExcursionReconciler {
 
   private notify(
     eventId: number,
-    kind: 'EXCURSION_STARTED' | 'EXCURSION_ENDED',
+    kind: 'EXCURSION_STARTED' | 'EXCURSION_ENDED' | 'EXCURSION_RETRACTED',
     message: string,
     now: number,
     out: WsMessage[],
@@ -140,5 +161,9 @@ export class ExcursionReconciler {
   private endedMessage(cabinetId: string, run: ExcursionRun): string {
     const minutes = Math.round(run.durationMs / 60_000);
     return `${this.assets.cabinetLabel(cabinetId)} 溫度異常事件結束：持續 ${minutes} 分鐘，累積超標 ${fromX10(run.degreeMinutesX10)} 度分鐘`;
+  }
+
+  private retractedMessage(cabinetId: string, event: EventRow): string {
+    return `${this.assets.cabinetLabel(cabinetId)} 溫度異常事件撤銷：補傳資料顯示自 ${formatTaipei(event.started_at)} 起的超標未連續達 10 分鐘`;
   }
 }

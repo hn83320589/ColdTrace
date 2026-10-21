@@ -97,4 +97,14 @@ describe('月報', () => {
       '溫度異常,台北分院,疫苗冷藏櫃 A,2026-10-01 00:10,2026-10-01 00:25,15',
     );
   });
+  it('已撤銷的溫度異常事件不計入事件數與累積度分鐘，但仍列在事件清單', () => {
+    insertMinutes(db, OCT, 60, (i) => (i >= 10 && i < 25 ? 95 : 45));
+    s.excursions.reconcile('C01', { from: OCT, to: OCT + 59 * MINUTE_MS }, OCT + DAY_MS, []);
+    run(db, `UPDATE events SET status = 'RETRACTED' WHERE type = 'EXCURSION'`);
+    const report = s.reports.monthly('2026-10', NOV + DAY_MS);
+
+    const summary = s.reports.summaryCsv(report).split('\r\n');
+    expect(summary[1]?.split(',').slice(-3)).toEqual(['0', '0', '0.0']);
+    expect(s.reports.eventsCsv(report)).toContain('已撤銷');
+  });
 });

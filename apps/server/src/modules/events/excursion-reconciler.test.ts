@@ -126,4 +126,48 @@ describe('ExcursionReconciler（經由 ReadingPipeline）', () => {
       { id: before!.id, degree_minutes_x10: 120, duration_ms: 12 * MINUTE_MS },
     ]);
   });
+  describe('補傳的正常讀值把連續段切短（撤銷與縮短）', () => {
+    // 第 1–6 分鐘超標、第 7 分鐘缺資料（≤ 2 分鐘仍視為連續）、第 8–13 分鐘超標 → 13 分鐘成立
+    const withGapAt7 = (tail: number[]) => [
+      ...series('TM-01', at(0), [5, ...repeat(9, 6)], 1),
+      ...series('TM-01', at(8), tail, 100),
+    ];
+
+    it('切開後兩段都不足 10 分鐘 → 事件撤銷，撤銷通知只有一則', () => {
+      ctx.clock.set(at(30));
+      ctx.pipeline.process(withGapAt7([...repeat(9, 6), 5]));
+      const [event] = excursions();
+      expect(event).toMatchObject({ status: 'CLOSED', duration_ms: 13 * MINUTE_MS });
+
+      for (let i = 0; i < 3; i++) ctx.pipeline.process(series('TM-01', at(7), [5], 50));
+
+      expect(excursions()).toMatchObject([{ id: event!.id, status: 'RETRACTED' }]);
+      expect(ctx.notifications.countFor(event!.id, 'EXCURSION_RETRACTED')).toBe(1);
+    });
+
+    it('切開後仍有一段達 10 分鐘 → 事件縮短為該段，不撤銷也不新增', () => {
+      ctx.clock.set(at(40));
+      // 第 8–19 分鐘超標 12 分鐘，原本與前段相連為 19 分鐘
+      ctx.pipeline.process(withGapAt7([...repeat(9, 12), 5]));
+      const [event] = excursions();
+      expect(event).toMatchObject({ started_at: at(1), duration_ms: 19 * MINUTE_MS });
+
+      ctx.pipeline.process(series('TM-01', at(7), [5], 50));
+
+      // 開始時間所在的前段（6 分鐘）不成立，事件改由後段（12 分鐘）承接
+      expect(excursions()).toMatchObject([
+        { id: event!.id, status: 'CLOSED', started_at: at(8), duration_ms: 12 * MINUTE_MS },
+      ]);
+      expect(ctx.notifications.countFor(event!.id, 'EXCURSION_RETRACTED')).toBe(0);
+    });
+
+    it('進行中的事件被切短到不成立 → 撤銷', () => {
+      ctx.clock.set(at(14));
+      ctx.pipeline.process(withGapAt7(repeat(9, 6))); // 資料到第 13 分鐘仍在超標
+      expect(excursions()).toMatchObject([{ status: 'OPEN' }]);
+
+      ctx.pipeline.process(series('TM-01', at(7), [5], 50));
+      expect(excursions()).toMatchObject([{ status: 'RETRACTED' }]);
+    });
+  });
 });

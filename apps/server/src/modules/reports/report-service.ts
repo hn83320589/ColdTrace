@@ -5,6 +5,7 @@ import {
   eventStatusLabel,
   EVENT_TYPE_LABEL,
   formatTaipei,
+  isCountedExcursion,
   taipeiMonthRange,
   type MonthlyCabinetReport,
   type MonthlyReport,
@@ -127,7 +128,7 @@ export class ReportService {
         '累積超標度分鐘',
       ],
       report.cabinets.map((c) => {
-        const excursions = c.events.filter((e) => e.type === 'EXCURSION');
+        const excursions = c.events.filter(isCountedExcursion);
         const degreeMinutes =
           excursions.reduce((sum, e) => sum + (e.degreeMinutesX10 ?? 0), 0) / 10;
         return [
@@ -141,7 +142,7 @@ export class ReportService {
           round2(c.completenessRate),
           round2(c.complianceRate),
           excursions.length,
-          c.events.length - excursions.length,
+          c.events.filter((e) => e.type === 'OFFLINE').length,
           degreeMinutes.toFixed(1),
         ];
       }),

@@ -96,7 +96,7 @@ export type ReadingPoint = [number, number];
 // ---------- 事件 ----------
 
 export type EventType = 'EXCURSION' | 'OFFLINE';
-export type ExcursionStatus = 'OPEN' | 'CLOSED' | 'MERGED';
+export type ExcursionStatus = 'OPEN' | 'CLOSED' | 'MERGED' | 'RETRACTED';
 export type OfflineStatus =
   /** 斷線中 */
   | 'OPEN'
@@ -153,7 +153,8 @@ export interface DispositionDto extends DispositionInput {
 
 // ---------- 通知 ----------
 
-export type NotificationKind = 'EXCURSION_STARTED' | 'EXCURSION_ENDED' | 'OFFLINE_STARTED';
+export type NotificationKind =
+  'EXCURSION_STARTED' | 'EXCURSION_ENDED' | 'EXCURSION_RETRACTED' | 'OFFLINE_STARTED';
 
 export interface NotificationDto {
   id: number;

@@ -147,6 +147,22 @@ describe('OfflineService', () => {
       expect(eventsOf('OFFLINE')[0]?.status).toBe('BACKFILLED_NORMAL');
     });
 
+    it('補傳的超標事件之後被撤銷 → 解除關聯，斷線事件改判為已補齊、溫度正常', () => {
+      // 第 50–55、57–62 分鐘超標，第 56 分鐘缺資料 → 13 分鐘異常事件
+      ctx.pipeline.process([
+        ...series('TM-01', at(10), [...repeat(4.5, 40), ...repeat(9.5, 6)], 11), // 10–55
+        ...series('TM-01', at(57), [...repeat(9.5, 6), ...repeat(4.5, 68)], 200), // 57–130
+      ]);
+      expect(eventsOf('OFFLINE')[0]?.status).toBe('BACKFILLED_EXCURSION');
+      expect(links()).toHaveLength(1);
+
+      ctx.pipeline.process(series('TM-01', at(56), [4.5], 500));
+
+      expect(eventsOf('EXCURSION')).toMatchObject([{ status: 'RETRACTED' }]);
+      expect(links()).toEqual([]);
+      expect(eventsOf('OFFLINE')[0]?.status).toBe('BACKFILLED_NORMAL');
+    });
+
     it('補傳順序（新到舊、分批）不影響最終結果', () => {
       const temps = [...repeat(4.5, 40), ...repeat(9.5, 30), ...repeat(4.5, 51)];
       const readings = series('TM-01', at(10), temps, 11);

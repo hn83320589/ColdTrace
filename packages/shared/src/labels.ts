@@ -12,6 +12,7 @@ const EXCURSION_STATUS_LABEL: Record<ExcursionStatus, string> = {
   OPEN: '進行中',
   CLOSED: '已結束',
   MERGED: '已合併',
+  RETRACTED: '已撤銷',
 };
 
 const OFFLINE_STATUS_LABEL: Record<OfflineStatus, string> = {
@@ -25,4 +26,9 @@ export function eventStatusLabel(event: Pick<EventDto, 'type' | 'status'>): stri
   return event.type === 'EXCURSION'
     ? EXCURSION_STATUS_LABEL[event.status as ExcursionStatus]
     : OFFLINE_STATUS_LABEL[event.status as OfflineStatus];
+}
+
+/** 計入月報事件數與度分鐘的溫度異常事件（已撤銷者僅保留紀錄） */
+export function isCountedExcursion(event: Pick<EventDto, 'type' | 'status'>): boolean {
+  return event.type === 'EXCURSION' && event.status !== 'RETRACTED';
 }
