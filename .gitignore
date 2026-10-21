@@ -1,0 +1,9 @@
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+data/*.db
+data/*.db-*
+.DS_Store
+test-results/
+playwright-report/

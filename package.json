@@ -1,0 +1,40 @@
+{
+  "name": "coldtrace",
+  "private": true,
+  "type": "module",
+  "description": "疫苗冷藏櫃溫度監測平台",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -k -n server,web,sim -c blue,green,magenta \"npm run dev -w @coldtrace/server\" \"npm run dev -w @coldtrace/web\" \"npm run start -w @coldtrace/simulator -- --scenario normal\"",
+    "dev:no-sim": "concurrently -k -n server,web -c blue,green \"npm run dev -w @coldtrace/server\" \"npm run dev -w @coldtrace/web\"",
+    "simulator": "npm run start -w @coldtrace/simulator --",
+    "seed": "npm run seed -w @coldtrace/server",
+    "db:reset": "npm run db:reset -w @coldtrace/server",
+    "build": "npm run build -w @coldtrace/web",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc -p tsconfig.json && npm run typecheck --workspaces --if-present",
+    "lint": "eslint . --max-warnings 0",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@types/node": "^24.19.2",
+    "concurrently": "^10.0.6",
+    "eslint": "^9.39.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.13.0",
+    "prettier": "^3.9.10",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.72.0",
+    "vitest": "^4.1.12"
+  }
+}
