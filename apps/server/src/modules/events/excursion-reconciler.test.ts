@@ -112,4 +112,18 @@ describe('ExcursionReconciler（經由 ReadingPipeline）', () => {
     ]);
     expect(excursions().map((e) => e.cabinet_id)).toEqual(['C01']);
   });
+  it('同一時間點換流水號重送，累積超標度分鐘與持續時間不變', () => {
+    ctx.clock.set(at(20));
+    // 1 分鐘正常 + 12 分鐘 9.0°C + 1 分鐘正常，共 14 個時間點
+    const temps = [5, ...repeat(9, 12), 5];
+    ctx.pipeline.process(series('TM-01', at(0), temps, 1));
+    const [before] = excursions();
+    expect(before).toMatchObject({ degree_minutes_x10: 120, duration_ms: 12 * MINUTE_MS });
+
+    const result = ctx.pipeline.process(series('TM-01', at(0), temps, 1001));
+    expect(result.response).toMatchObject({ accepted: 0, duplicated: 14 });
+    expect(excursions()).toMatchObject([
+      { id: before!.id, degree_minutes_x10: 120, duration_ms: 12 * MINUTE_MS },
+    ]);
+  });
 });

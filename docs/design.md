@@ -294,7 +294,7 @@ bindings  (id INTEGER PK, device_id TEXT FK, cabinet_id TEXT FK,
 readings  (device_id TEXT, seq INTEGER, cabinet_id TEXT, measured_at INTEGER,
            temp_x10 INTEGER, battery INTEGER, received_at INTEGER,
            PRIMARY KEY (device_id, seq)) WITHOUT ROWID
-  INDEX idx_readings_cabinet_time (cabinet_id, measured_at)
+  UNIQUE INDEX ux_readings_cabinet_time (cabinet_id, measured_at)  -- migration v2：同一時間點只留一筆
 
 events    (id INTEGER PK, cabinet_id TEXT FK, type TEXT CHECK (type IN ('EXCURSION','OFFLINE')),
            status TEXT, started_at INTEGER, ended_at INTEGER NULL, detected_at INTEGER,

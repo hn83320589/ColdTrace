@@ -99,4 +99,21 @@ export const migrations: Migration[] = [
       CREATE INDEX idx_dispositions_event ON dispositions(event_id, created_at);
     `,
   },
+  {
+    version: 2,
+    name: 'readings_unique_cabinet_time',
+    // 韌體重開機後可能用新流水號重送同一時間點的資料，同一冷藏櫃同一量測時間只保留最早收到的一筆
+    sql: `
+      DELETE FROM readings
+      WHERE EXISTS (
+        SELECT 1 FROM readings AS earlier
+        WHERE earlier.cabinet_id = readings.cabinet_id
+          AND earlier.measured_at = readings.measured_at
+          AND (earlier.received_at, earlier.device_id, earlier.seq)
+            < (readings.received_at, readings.device_id, readings.seq)
+      );
+      DROP INDEX idx_readings_cabinet_time;
+      CREATE UNIQUE INDEX ux_readings_cabinet_time ON readings(cabinet_id, measured_at);
+    `,
+  },
 ];

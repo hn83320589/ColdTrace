@@ -81,6 +81,36 @@ describe('IngestionService', () => {
     expect(get<{ t: number }>(db, 'SELECT temp_x10 AS t FROM readings')?.t).toBe(40);
   });
 
+  it('同一冷藏櫃同一量測時間換了流水號重送（韌體重開機），視為重複不寫入', () => {
+    const original = series('TM-01', now - 14 * MINUTE_MS, repeat(9.0, 14), 1);
+    ingestion.ingest(original, now);
+    const resent = series('TM-01', now - 14 * MINUTE_MS, repeat(9.0, 14), 1001);
+    const result = ingestion.ingest(resent, now);
+
+    expect(result.response).toMatchObject({ accepted: 0, duplicated: 14, rejectedCount: 0 });
+    expect(result.conflicts).toEqual([]);
+    expect(result.affected.size).toBe(0);
+    expect(countReadings(db)).toBe(14);
+  });
+
+  it('同一量測時間、不同流水號且溫度不同時，保留原始紀錄並回報衝突', () => {
+    ingestion.ingest(series('TM-01', now - MINUTE_MS, [4.0], 1), now);
+    const result = ingestion.ingest(series('TM-01', now - MINUTE_MS, [9.9], 500), now);
+
+    expect(result.response).toMatchObject({ accepted: 0, duplicated: 1 });
+    expect(result.conflicts).toEqual([{ deviceId: 'TM-01', seq: 500 }]);
+    expect(get<{ t: number }>(db, 'SELECT temp_x10 AS t FROM readings')?.t).toBe(40);
+  });
+
+  it('同一批次內出現同一量測時間的兩筆資料，只寫入第一筆', () => {
+    const [a] = series('TM-01', now - MINUTE_MS, [4.0], 1);
+    const [b] = series('TM-01', now - MINUTE_MS, [4.0], 2);
+    const { response } = ingestion.ingest([a!, b!], now);
+
+    expect(response).toMatchObject({ accepted: 1, duplicated: 1 });
+    expect(countReadings(db)).toBe(1);
+  });
+
   it('回報各冷藏櫃實際新增資料的時間範圍', () => {
     const a = series('TM-01', now - 30 * MINUTE_MS, [4.0, 4.0]);
     const b = series('TM-02', now - 5 * MINUTE_MS, [5.0]);
