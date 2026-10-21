@@ -369,7 +369,7 @@ npm test
 | 11  | 1,440 點 1 秒內繪製                        | 面板顯示繪製耗時，實測 4–6 ms                                    |
 | 12  | 合規率、完整率手算一致；CSV 中文不亂碼     | `report-service.test.ts`、`csv.test.ts`                          |
 | 13  | 16 台 30 分鐘無錯誤、判定符合情境          | 模擬器 `--duration 30m` 結束時自動驗證                           |
-| 14  | ≥ 30 個單元測試、lint 無錯誤               | 89 個測試；CI 執行 lint / typecheck / test / build               |
+| 14  | ≥ 30 個單元測試、lint 無錯誤               | 90 個測試；CI 執行 lint / typecheck / test / build               |
 
 CI：GitHub Actions 於 Node 22 與 24 執行 lint、format check、typecheck、test、build（`.github/workflows/ci.yml`）。
 
