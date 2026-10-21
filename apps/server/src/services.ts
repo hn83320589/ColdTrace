@@ -9,6 +9,7 @@ import { OfflineService } from './modules/events/offline-service';
 import { IngestionService } from './modules/ingestion/ingestion-service';
 import { ReadingPipeline } from './modules/ingestion/reading-pipeline';
 import { NotificationService } from './modules/notifications/notification-service';
+import { ReportService } from './modules/reports/report-service';
 import { EventBus } from './realtime/event-bus';
 
 /** 組裝所有 service（手動依賴注入，測試可替換 db 與 clock） */
@@ -22,6 +23,7 @@ export function createServices(db: Db, clock: Clock) {
   const pipeline = new ReadingPipeline(db, clock, ingestion, excursions, [offline]);
   const dashboard = new DashboardService(db);
   const eventQueries = new EventQueryService(db, events);
+  const reports = new ReportService(db, eventQueries);
   const bus = new EventBus();
 
   return {
@@ -31,10 +33,12 @@ export function createServices(db: Db, clock: Clock) {
     assets,
     events,
     notifications,
+    excursions,
     offline,
     pipeline,
     dashboard,
     eventQueries,
+    reports,
     /** 推播 domain messages，並補上受影響冷藏櫃的狀態 */
     publish(messages: Parameters<EventBus['publish']>[0]): void {
       if (messages.length === 0) return;

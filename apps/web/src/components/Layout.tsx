@@ -7,6 +7,7 @@ import { Toasts } from './Toasts';
 const NAV = [
   ['/', '儀表板'],
   ['/events', '事件紀錄'],
+  ['/reports', '月報'],
   ['/devices', '設備管理'],
 ] as const;
 

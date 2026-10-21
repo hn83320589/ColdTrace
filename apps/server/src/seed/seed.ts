@@ -55,7 +55,7 @@ export function seedSampleData(db: Db, realNow: number, days = 7) {
     start + day * DAY_MS + hour * HOUR_MS + minute * MINUTE_MS;
 
   // ---------- 主檔 ----------
-  const bindFrom = start - DAY_MS;
+  const bindFrom = start;
   BRANCHES.forEach(([id, name], i) => {
     s.assets.createBranch({ id, name });
     for (const [k, label] of [

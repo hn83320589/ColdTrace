@@ -127,6 +127,30 @@ export function registerRoutes(app: FastifyInstance, s: Services): void {
     return s.notifications.list(limit);
   });
 
+  // ---------- 月報 ----------
+  const monthQuery = z.object({
+    month: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, '月份格式應為 YYYY-MM'),
+  });
+
+  app.get('/api/reports/monthly', (req) => {
+    const { month } = parse(monthQuery, req.query);
+    return s.reports.monthly(month, s.clock.now());
+  });
+
+  app.get('/api/reports/monthly.csv', (req, reply) => {
+    const { month, kind } = parse(
+      monthQuery.extend({ kind: z.enum(['summary', 'events']).default('summary') }),
+      req.query,
+    );
+    const report = s.reports.monthly(month, s.clock.now());
+    const csv = kind === 'summary' ? s.reports.summaryCsv(report) : s.reports.eventsCsv(report);
+    const filename = `ColdTrace月報_${month}_${kind === 'summary' ? '摘要' : '事件清單'}.csv`;
+    return reply
+      .header('content-type', 'text/csv; charset=utf-8')
+      .header('content-disposition', `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`)
+      .send(csv);
+  });
+
   // ---------- 系統 ----------
   app.get('/api/system/clock', (): ClockInfo => ({ now: s.clock.now(), speed: s.clock.speed }));
 

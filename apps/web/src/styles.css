@@ -639,3 +639,15 @@ tr.muted td {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+a.button {
+  background: var(--brand);
+  color: #fff;
+  border-radius: 6px;
+  padding: 0.45rem 0.9rem;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+td.warn {
+  color: var(--alert);
+  font-weight: 600;
+}

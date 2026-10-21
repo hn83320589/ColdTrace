@@ -7,6 +7,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { DevicesPage } from './pages/DevicesPage';
 import { EventDetailPage } from './pages/EventDetailPage';
 import { EventsPage } from './pages/EventsPage';
+import { ReportsPage } from './pages/ReportsPage';
 import { RealtimeProvider } from './realtime';
 import './styles.css';
 
@@ -27,6 +28,7 @@ createRoot(root).render(
               <Route index element={<DashboardPage />} />
               <Route path="events" element={<EventsPage />} />
               <Route path="events/:id" element={<EventDetailPage />} />
+              <Route path="reports" element={<ReportsPage />} />
               <Route path="devices" element={<DevicesPage />} />
             </Route>
           </Routes>
