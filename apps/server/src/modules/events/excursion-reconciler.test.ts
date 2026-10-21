@@ -145,6 +145,12 @@ describe('ExcursionReconciler（經由 ReadingPipeline）', () => {
       expect(ctx.notifications.countFor(event!.id, 'EXCURSION_RETRACTED')).toBe(1);
     });
 
+    it('事件結束後繼續送正常資料，不會被誤判為孤兒而撤銷', () => {
+      sendRealtime([5, ...repeat(9, 10), 5], 0, 1); // 第 11 分鐘結束
+      sendRealtime(repeat(5, 5), 12, 13);
+      expect(excursions()).toMatchObject([{ status: 'CLOSED', ended_at: at(11) }]);
+    });
+
     it('切開後仍有一段達 10 分鐘 → 事件縮短為該段，不撤銷也不新增', () => {
       ctx.clock.set(at(40));
       // 第 8–19 分鐘超標 12 分鐘，原本與前段相連為 19 分鐘
