@@ -5,6 +5,7 @@ import { createTestContext } from '../../test/context';
 import { repeat, series } from '../../test/fixtures';
 import { T0 } from '../../test/helpers';
 import type { EventRow } from './event-repository';
+import { OfflineService } from './offline-service';
 
 const at = (minute: number) => T0 + minute * MINUTE_MS;
 
@@ -40,6 +41,38 @@ describe('OfflineService', () => {
     const messages = ctx.offline.scan(ctx.clock.now());
     expect(eventsOf('OFFLINE')).toMatchObject([{ status: 'OPEN', started_at: at(10) }]);
     expect(messages.map((m) => m.type)).toContain('notification.created');
+  });
+
+  it('伺服器自己停機後重啟：從啟動時間起算 15 分鐘，給溫度計補傳的機會', () => {
+    // 最後一筆在第 9 分鐘，伺服器停機到第 120 分鐘才重啟
+    const restarted = new OfflineService(
+      ctx.db,
+      ctx.events,
+      ctx.notifications,
+      ctx.assets,
+      at(120),
+    );
+    restarted.scan(at(121));
+    restarted.scan(at(135));
+    expect(eventsOf('OFFLINE')).toHaveLength(0);
+
+    // 重啟後溫度計補傳了停機期間的資料 → 不需要斷線事件
+    ctx.clock.set(at(130));
+    ctx.pipeline.process(series('TM-01', at(10), repeat(4.5, 120), 11));
+    restarted.scan(at(140));
+    expect(eventsOf('OFFLINE')).toHaveLength(0);
+  });
+
+  it('伺服器重啟後超過 15 分鐘仍沒有資料，才成立斷線事件，起點仍是資料中斷的時間', () => {
+    const restarted = new OfflineService(
+      ctx.db,
+      ctx.events,
+      ctx.notifications,
+      ctx.assets,
+      at(120),
+    );
+    restarted.scan(at(135) + SECOND_MS);
+    expect(eventsOf('OFFLINE')).toMatchObject([{ status: 'OPEN', started_at: at(10) }]);
   });
 
   it('重複掃描只會有一個斷線事件與一則通知', () => {

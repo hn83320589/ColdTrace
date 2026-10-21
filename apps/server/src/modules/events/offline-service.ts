@@ -15,7 +15,7 @@ import type { EventRepository, EventRow } from './event-repository';
 
 /**
  * 斷線事件：
- * - scan()：定期檢查，冷藏櫃超過 15 分鐘沒有資料就成立事件
+ * - scan()：定期檢查，冷藏櫃超過 15 分鐘沒有資料就成立事件（伺服器重啟後從啟動時間重新起算）
  * - afterIngest()：資料寫入後，判斷是否已恢復、補傳是否補齊、期間是否有超標
  */
 export class OfflineService implements AfterIngestHook {
@@ -24,6 +24,8 @@ export class OfflineService implements AfterIngestHook {
     private readonly events: EventRepository,
     private readonly notifications: NotificationService,
     private readonly assets: AssetService,
+    /** 本服務開始監控的時間；伺服器自己停機的期間不能算成溫度計斷線 */
+    private readonly monitoringSince: number,
   ) {}
 
   scan(now: number): WsMessage[] {
@@ -33,9 +35,9 @@ export class OfflineService implements AfterIngestHook {
         const cabinetId = binding.cabinetId;
         if (this.openEvent(cabinetId)) continue;
 
-        // 從未回報的冷藏櫃，以綁定開始時間起算
+        // 從未回報的冷藏櫃以綁定開始時間起算；伺服器重啟後至少等 15 分鐘，讓溫度計有時間補傳
         const lastSeen = this.latestMeasuredAt(cabinetId);
-        const silentSince = lastSeen ?? binding.boundFrom;
+        const silentSince = Math.max(lastSeen ?? binding.boundFrom, this.monitoringSince);
         if (now - silentSince <= OFFLINE_THRESHOLD_MS) continue;
 
         const startedAt = lastSeen === null ? binding.boundFrom : lastSeen + SAMPLE_INTERVAL_MS;

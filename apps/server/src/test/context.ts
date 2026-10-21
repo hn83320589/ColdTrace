@@ -18,7 +18,7 @@ export function createTestContext() {
   const notifications = new NotificationService(db);
   const excursions = new ExcursionReconciler(db, events, notifications, assets);
   const ingestion = new IngestionService(db, assets);
-  const offline = new OfflineService(db, events, notifications, assets);
+  const offline = new OfflineService(db, events, notifications, assets, clock.now());
   const pipeline = new ReadingPipeline(db, clock, ingestion, excursions, [offline]);
   return { db, clock, assets, events, notifications, excursions, offline, ingestion, pipeline };
 }

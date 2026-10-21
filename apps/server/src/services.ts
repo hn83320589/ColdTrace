@@ -18,7 +18,7 @@ export function createServices(db: Db, clock: Clock) {
   const events = new EventRepository(db);
   const notifications = new NotificationService(db);
   const excursions = new ExcursionReconciler(db, events, notifications, assets);
-  const offline = new OfflineService(db, events, notifications, assets);
+  const offline = new OfflineService(db, events, notifications, assets, clock.now());
   const ingestion = new IngestionService(db, assets);
   const pipeline = new ReadingPipeline(db, clock, ingestion, excursions, [offline]);
   const dashboard = new DashboardService(db);
