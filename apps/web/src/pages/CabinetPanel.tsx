@@ -4,7 +4,7 @@ import { Link } from 'react-router';
 import { DAY_MS } from '@coldtrace/shared';
 import { api } from '../api';
 import { EventBadge } from '../components/StatusBadge';
-import { TemperatureChart } from '../components/TemperatureChart';
+import { TemperatureChart } from '../components/LazyTemperatureChart';
 import { EVENT_TYPE_LABEL, eventStatusLabel, formatDuration, formatTime } from '../lib/format';
 import { useServerNow } from '../server-clock';
 

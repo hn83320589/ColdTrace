@@ -5,7 +5,7 @@ import { HOUR_MS } from '@coldtrace/shared';
 import { dispositionInputSchema, type EventDetailDto } from '@coldtrace/shared';
 import { api } from '../api';
 import { EventBadge } from '../components/StatusBadge';
-import { TemperatureChart } from '../components/TemperatureChart';
+import { TemperatureChart } from '../components/LazyTemperatureChart';
 import {
   EVENT_TYPE_LABEL,
   eventStatusLabel,

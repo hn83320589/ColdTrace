@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { NavLink, Outlet } from 'react-router';
 import { formatTaipei } from '@coldtrace/shared';
 import { useRealtime } from '../realtime';
@@ -41,7 +42,9 @@ export function Layout() {
         </div>
       </header>
       <main>
-        <Outlet />
+        <Suspense fallback={<p className="muted">載入中…</p>}>
+          <Outlet />
+        </Suspense>
       </main>
       <Toasts />
     </div>

@@ -1,7 +1,9 @@
+import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useSearchParams } from 'react-router';
 import type { CabinetSnapshot, CabinetStatus } from '@coldtrace/shared';
 import { api } from '../api';
+import { preloadTemperatureChart } from '../components/LazyTemperatureChart';
 import { StatusBadge } from '../components/StatusBadge';
 import { formatAgo, formatTemp, formatTime } from '../lib/format';
 import { useServerNow } from '../server-clock';
@@ -16,6 +18,7 @@ export function DashboardPage() {
   const [params, setParams] = useSearchParams();
   const selected = params.get('cabinet');
   const { now } = useServerNow();
+  useEffect(preloadTemperatureChart, []);
 
   if (error) return <p className="error">載入失敗：{error.message}</p>;
   if (!branches) return <p className="muted">載入中…</p>;
