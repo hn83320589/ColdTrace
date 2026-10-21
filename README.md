@@ -1,5 +1,8 @@
 # ColdTrace — 疫苗冷藏櫃溫度監測平台
 
+[![CI](https://github.com/hn83320589/ColdTrace/actions/workflows/ci.yml/badge.svg)](https://github.com/hn83320589/ColdTrace/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 8 間分院、16 台疫苗冷藏櫃的溫度監測系統。接收 IoT 溫度計每分鐘回報的量測資料（含斷線補傳），
 自動判定「溫度異常」與「斷線」事件，透過 WebSocket 即時推播到儀表板，並提供事件處置紀錄與月報。
 
@@ -416,3 +419,7 @@ CI：GitHub Actions 於 Node 22 與 24 執行 lint、format check、typecheck、
 - **無登入與權限**：依需求假設僅於診所內網使用，處置人為自由輸入文字。
 - **時區**：前端時間顯示固定為台灣時間；圖表橫軸刻度位置依瀏覽器時區計算（在台灣使用時無差異）。
 - **前端 bundle** 約 880 kB（主要為 ECharts），內網使用未做拆分。
+
+## 授權
+
+[MIT](LICENSE)
