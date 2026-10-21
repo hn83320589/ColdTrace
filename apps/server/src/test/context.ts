@@ -2,6 +2,7 @@ import { FixedClock } from '../infra/clock';
 import type { Db } from '../infra/db';
 import { EventRepository } from '../modules/events/event-repository';
 import { ExcursionReconciler } from '../modules/events/excursion-reconciler';
+import { OfflineService } from '../modules/events/offline-service';
 import { IngestionService } from '../modules/ingestion/ingestion-service';
 import { ReadingPipeline } from '../modules/ingestion/reading-pipeline';
 import { NotificationService } from '../modules/notifications/notification-service';
@@ -17,6 +18,7 @@ export function createTestContext() {
   const notifications = new NotificationService(db);
   const excursions = new ExcursionReconciler(db, events, notifications, assets);
   const ingestion = new IngestionService(db, assets);
-  const pipeline = new ReadingPipeline(db, clock, ingestion, excursions);
-  return { db, clock, assets, events, notifications, excursions, ingestion, pipeline };
+  const offline = new OfflineService(db, events, notifications, assets);
+  const pipeline = new ReadingPipeline(db, clock, ingestion, excursions, [offline]);
+  return { db, clock, assets, events, notifications, excursions, offline, ingestion, pipeline };
 }

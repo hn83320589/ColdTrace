@@ -173,14 +173,14 @@ POST /api/readings/batch
 斷線事件狀態機：
 
 ```
- OPEN ──(最新讀值回到 15 分鐘內)──▶ RECOVERED ──(每次有讀值落入斷線區間就重新評估)──┐
+ OPEN ──(最新讀值回到 15 分鐘內，立即評估；之後每次有讀值落入斷線區間就重新評估)──┐
                                                                                  ▼
                          ┌── 區間內資料完整、無異常事件  → BACKFILLED_NORMAL   「已補齊、溫度正常」
                          ├── 區間內有異常事件            → BACKFILLED_EXCURSION 並建立關聯
                          └── 區間內資料仍有缺口          → INCOMPLETE          「資料不完整」
 ```
 
-- 斷線區間 = `[startedAt, recoveredAt)`。
+- 斷線區間 = `[startedAt, endedAt)`，`endedAt` 為證明恢復即時回報的那筆讀值時間（用量測時間，補傳順序不影響區間）。
 - 「完整」定義：區間內每一分鐘都有讀值（容忍與 §5.2 相同的 2 分鐘缺口規則）。
 - 關聯表 `event_links(offline_event_id, excursion_event_id)`，多對多（一次斷線可能含兩段超標，一段超標也可能跨兩次斷線）。
 - 補傳順序不影響結果：裝置先送舊資料或先送新資料，最後收斂到同一狀態 → 驗收 #8。

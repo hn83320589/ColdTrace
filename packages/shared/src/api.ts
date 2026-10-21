@@ -98,7 +98,14 @@ export type ReadingPoint = [number, number];
 export type EventType = 'EXCURSION' | 'OFFLINE';
 export type ExcursionStatus = 'OPEN' | 'CLOSED' | 'MERGED';
 export type OfflineStatus =
-  'OPEN' | 'RECOVERED' | 'BACKFILLED_NORMAL' | 'BACKFILLED_EXCURSION' | 'INCOMPLETE';
+  /** 斷線中 */
+  | 'OPEN'
+  /** 已補齊、溫度正常 */
+  | 'BACKFILLED_NORMAL'
+  /** 補傳資料顯示期間有超標，已關聯溫度異常事件 */
+  | 'BACKFILLED_EXCURSION'
+  /** 已恢復連線，但斷線期間資料仍有缺口 */
+  | 'INCOMPLETE';
 
 export interface EventDto {
   id: number;

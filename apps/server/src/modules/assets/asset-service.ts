@@ -145,6 +145,16 @@ export class AssetService {
     ).map(toBindingDto);
   }
 
+  /** now 時間點仍在綁定中的冷藏櫃 */
+  activeBindings(now: number): BindingDto[] {
+    return all<BindingRow>(
+      this.db,
+      `SELECT * FROM bindings WHERE bound_from <= ? AND (bound_to IS NULL OR bound_to > ?)
+       ORDER BY cabinet_id`,
+      [now, now],
+    ).map(toBindingDto);
+  }
+
   listAllBindings(): BindingDto[] {
     return all<BindingRow>(this.db, 'SELECT * FROM bindings ORDER BY cabinet_id, bound_from').map(
       toBindingDto,
