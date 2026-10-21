@@ -75,7 +75,8 @@ expect(eventsOf('OFFLINE')).toMatchObject([{ status: 'OPEN', started_at: at(10) 
 
 ## 7.3 恢復：`afterIngest`
 
-```ts
+```text
+// 簡化的虛擬碼：SQL 直接寫在行內，完整程式見原始檔
 afterIngest(cabinetId: string, range: TimeRange, now: number, out: WsMessage[]): void {
   const toAssess = new Set<number>();
 
@@ -107,7 +108,8 @@ afterIngest(cabinetId: string, range: TimeRange, now: number, out: WsMessage[]):
 
 ## 7.4 判定：`assess`
 
-```ts
+```text
+// 簡化的虛擬碼：SQL 直接寫在行內，完整程式見原始檔
 private assess(event: EventRow, now: number, out: WsMessage[]): void {
   const from = event.started_at;
   const to = event.ended_at ?? now;

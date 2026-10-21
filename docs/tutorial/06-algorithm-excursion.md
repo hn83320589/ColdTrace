@@ -175,7 +175,8 @@ it('連續段中缺資料 ≤ 2 分鐘仍視為連續，但缺口不累計度分
 新資料只落在 `[range.from, range.to]`，不需要重算整個歷史。但新資料可能讓**相鄰的** run 延長或連接，
 所以視窗要往外延伸：
 
-```ts
+```text
+// 簡化的虛擬碼：SQL 直接寫在行內，完整程式見原始檔
 // 往前：range.from 之前最近一筆「正常」讀值
 const windowFrom = SELECT MAX(measured_at) FROM readings
                    WHERE cabinet_id = ? AND measured_at < range.from AND 正常 ?? 0;
