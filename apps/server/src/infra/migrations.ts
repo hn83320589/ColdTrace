@@ -58,16 +58,16 @@ export const migrations: Migration[] = [
         type        TEXT    NOT NULL CHECK (type IN ('EXCURSION', 'OFFLINE')),
         status      TEXT    NOT NULL,
         started_at  INTEGER NOT NULL,
+        -- 斷線事件的 ended_at 為恢復即時回報的時間
         ended_at    INTEGER,
         detected_at INTEGER NOT NULL,
-        -- 溫度異常事件專用
+        -- 溫度異常事件專用（duration_ms = 最後一筆超標 + 1 分鐘 − 開始時間）
+        duration_ms        INTEGER,
         max_temp_x10       INTEGER,
         min_temp_x10       INTEGER,
         degree_minutes_x10 INTEGER,
         backfilled         INTEGER NOT NULL DEFAULT 0,
-        merged_into        INTEGER REFERENCES events(id),
-        -- 斷線事件專用：recovered_at 為恢復即時回報的時間
-        recovered_at INTEGER
+        merged_into        INTEGER REFERENCES events(id)
       );
       CREATE INDEX idx_events_cabinet ON events(cabinet_id, type, started_at);
       CREATE INDEX idx_events_status ON events(type, status);

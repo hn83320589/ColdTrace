@@ -115,6 +115,18 @@ export class AssetService {
     });
   }
 
+  /** 通知訊息用的顯示名稱，例如「台北分院／冷藏櫃 A」 */
+  cabinetLabel(cabinetId: string): string {
+    const row = get<{ branch: string; cabinet: string }>(
+      this.db,
+      `SELECT b.name AS branch, c.name AS cabinet
+       FROM cabinets c JOIN branches b ON b.id = c.branch_id WHERE c.id = ?`,
+      [cabinetId],
+    );
+    if (!row) throw new NotFoundError('冷藏櫃', cabinetId);
+    return `${row.branch}／${row.cabinet}`;
+  }
+
   resolveCabinet(deviceId: string, measuredAt: number): string | null {
     const row = get<{ cabinet_id: string }>(
       this.db,
