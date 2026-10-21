@@ -151,8 +151,8 @@ sequenceDiagram
     participant P as ReadingPipeline
     participant Ing as IngestionService
     participant Rec as ExcursionReconciler
-    participant Off as OfflineService
-    participant Not as NotificationService
+    participant Offline as OfflineService
+    participant Notify as NotificationService
     participant Bus as EventBus → WebSocket
 
     Dev->>API: POST /api/readings/batch（最多 1,000 筆）
@@ -164,9 +164,9 @@ sequenceDiagram
     Ing-->>P: 接受／重複／拒收，<br/>各冷藏櫃受影響的時間範圍
     loop 每個受影響的冷藏櫃
         P->>Rec: reconcile(cabinet, range)
-        Rec->>Not: notify(event, EXCURSION_STARTED)
-        Note right of Not: INSERT OR IGNORE<br/>changes=1 才回傳通知
-        P->>Off: afterIngest(cabinet, range)
+        Rec->>Notify: notify(event, EXCURSION_STARTED)
+        Note right of Notify: INSERT OR IGNORE<br/>changes=1 才回傳通知
+        P->>Offline: afterIngest(cabinet, range)
     end
     Note over P: COMMIT（RELEASE）
     deactivate P
