@@ -335,9 +335,15 @@ curl -X POST localhost:3000/api/readings/batch -H 'content-type: application/jso
 
 ## 測試
 
+完整的測試過程、證據與發現的缺陷見 **[測試報告](docs/test-report.md)**。
+
 ```bash
-npm test
+npm test                                      # 單元與整合測試
+npm run acceptance -- http://localhost:3200   # 黑箱驗收（對執行中的伺服器，建議 CLOCK_SPEED=60）
 ```
+
+`scripts/acceptance.ts` 只透過 HTTP API 與 WebSocket 操作執行中的伺服器，逐條驗證驗收標準 #1–#12，
+每次執行建立獨立的測試資料，可對同一台伺服器重複執行。
 
 共 90 個 Vitest 測試，涵蓋：
 
