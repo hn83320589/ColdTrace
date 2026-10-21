@@ -13,7 +13,7 @@
 | 測試層級                 | 方法                                                                      | 結果                                          |
 | ------------------------ | ------------------------------------------------------------------------- | --------------------------------------------- |
 | 乾淨環境建置             | 全新 `git clone` → `npm ci` → lint / format / typecheck / build           | 全數通過                                      |
-| 單元與整合測試           | Vitest，97 個測試、21 個檔案                                              | 97 / 97 通過                                  |
+| 單元與整合測試           | Vitest，103 個測試、21 個檔案                                             | 103 / 103 通過                                |
 | 黑箱驗收                 | `scripts/acceptance.ts` 只透過 HTTP + WebSocket 操作執行中的伺服器（×60） | 12 / 12 通過（連續 2 次）                     |
 | 模擬器端對端（加速）     | 16 台 × 150 模擬分鐘、四種情境、結束時自動比對                            | 16 / 16 符合情境，錯誤 0                      |
 | 模擬器端對端（真實時間） | 16 台 × 30 分鐘、四種情境                                                 | 14 / 16 符合、2 / 16 依情境尚在斷線中，錯誤 0 |
@@ -51,22 +51,22 @@
 | `npm run format:check` | 所有檔案符合 Prettier                                         |
 | `npm run typecheck`    | 0 error（TypeScript strict、`noUncheckedIndexedAccess`）      |
 | `npm run build`        | 成功                                                          |
-| `npm test`             | 21 個檔案、97 個測試全數通過                                  |
+| `npm test`             | 21 個檔案、103 個測試全數通過                                 |
 
-### 3.2 單元與整合測試（97 個）
+### 3.2 單元與整合測試（103 個）
 
-| 檔案                                        | 數量 | 涵蓋重點                                                                                                              |
-| ------------------------------------------- | ---: | --------------------------------------------------------------------------------------------------------------------- |
-| `events/excursion-detector.test.ts`         |   10 | 9 / 10 分鐘邊界、2.0 / 8.0 邊界、低溫、度分鐘手算 10.3、缺口 ≤ 2 分鐘、亂序輸入                                       |
-| `events/excursion-reconciler.test.ts`       |    8 | 即時成立與結束、重送與亂序分批只一則成立通知、補傳往前延長、兩事件合併、歷史事件補傳、換流水號重送度分鐘不變          |
-| `events/offline-service.test.ts`            |   10 | 15 分鐘邊界、從未回報的冷藏櫃、伺服器重啟寬限、重複掃描只一則通知、補齊正常 / 含超標並關聯 / 不完整、補傳順序無關     |
-| `events/coverage.test.ts`                   |    4 | 斷線區間資料完整度                                                                                                    |
-| `ingestion/ingestion.test.ts`               |   11 | 重送 3 次筆數不變、同一時間點換流水號視為重複、72h / 75h 邊界並列出流水號、未來時間、未知裝置、無綁定、內容衝突不覆寫 |
-| `assets/assets.test.ts`                     |    6 | 綁定半開區間、更換溫度計、重疊拒絕、不可改寫歷史、失敗回滾                                                            |
-| `reports/report-service.test.ts`            |    5 | 手算完整率與合規率、台灣時間月份邊界、綁定期間、CSV 內容                                                              |
-| `reports/csv.test.ts`                       |    2 | UTF-8 BOM、CRLF、RFC 4180 跳脫                                                                                        |
-| `http/app.test.ts`                          |    5 | 驗證錯誤、推播內容、處置驗證、更換溫度計 API、404                                                                     |
-| 其他（infra、seed、web、simulator、shared） |   36 | 時鐘、migration、範例資料、缺口插入、伺服器時鐘推算、裝置緩衝重送、情境驗證、溫度模型、台灣時間                       |
+| 檔案                                        | 數量 | 涵蓋重點                                                                                                                                      |
+| ------------------------------------------- | ---: | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `events/excursion-detector.test.ts`         |   10 | 9 / 10 分鐘邊界、2.0 / 8.0 邊界、低溫、度分鐘手算 10.3、缺口 ≤ 2 分鐘、亂序輸入                                                               |
+| `events/excursion-reconciler.test.ts`       |   12 | 即時成立與結束、重送與亂序分批只一則成立通知、補傳往前延長、兩事件合併、歷史事件補傳、換流水號重送度分鐘不變、補傳切短後撤銷 / 改由成立段承接 |
+| `events/offline-service.test.ts`            |   11 | 15 分鐘邊界、從未回報的冷藏櫃、伺服器重啟寬限、重複掃描只一則通知、補齊正常 / 含超標並關聯 / 不完整、關聯事件撤銷後改判、補傳順序無關         |
+| `events/coverage.test.ts`                   |    4 | 斷線區間資料完整度                                                                                                                            |
+| `ingestion/ingestion.test.ts`               |   11 | 重送 3 次筆數不變、同一時間點換流水號視為重複、72h / 75h 邊界並列出流水號、未來時間、未知裝置、無綁定、內容衝突不覆寫                         |
+| `assets/assets.test.ts`                     |    6 | 綁定半開區間、更換溫度計、重疊拒絕、不可改寫歷史、失敗回滾                                                                                    |
+| `reports/report-service.test.ts`            |    6 | 手算完整率與合規率、台灣時間月份邊界、綁定期間、CSV 內容、已撤銷事件不計入                                                                    |
+| `reports/csv.test.ts`                       |    2 | UTF-8 BOM、CRLF、RFC 4180 跳脫                                                                                                                |
+| `http/app.test.ts`                          |    5 | 驗證錯誤、推播內容、處置驗證、更換溫度計 API、404                                                                                             |
+| 其他（infra、seed、web、simulator、shared） |   36 | 時鐘、migration、範例資料、缺口插入、伺服器時鐘推算、裝置緩衝重送、情境驗證、溫度模型、台灣時間                                               |
 
 完整清單見[附錄](#附錄單元測試清單)。
 
@@ -198,19 +198,20 @@
 | 11  | 1,440 點 1 秒內完成繪製                                                           | 黑箱 #11（點數）；瀏覽器 3.5（最慢 47 ms）                                          | ✅   |
 | 12  | 合規率、完整率與手算一致；CSV 用 Excel 開啟中文不亂碼                             | `report-service.test.ts`、`csv.test.ts`；黑箱 #12；Excel 3.6                        | ✅   |
 | 13  | 16 台 30 分鐘後端無錯誤，事件判定與情境相符                                       | 模擬器 3.4（加速 150 分鐘與真實 30 分鐘）                                           | ✅   |
-| 14  | 單元測試 ≥ 30 個，`npm test` 全數通過，lint 無錯誤                                | 97 個測試；乾淨環境 3.1                                                             | ✅   |
+| 14  | 單元測試 ≥ 30 個，`npm test` 全數通過，lint 無錯誤                                | 103 個測試；乾淨環境 3.1                                                            | ✅   |
 
 ---
 
 ## 5. 測試中發現的缺陷
 
-| #   | 缺陷                                                                                      | 發現方式         | 處置                                                                                |
-| --- | ----------------------------------------------------------------------------------------- | ---------------- | ----------------------------------------------------------------------------------- |
-| 1   | 從未回報過的冷藏櫃在綁定後第 14 分鐘就判定斷線，與「超過 15 分鐘」的規則不一致            | Code review      | 先寫失敗測試，改以綁定時間起算（commit `0947ac4`）                                  |
-| 2   | 月報 CSV 的月份 `2026-10` 被 Excel 自動轉成日期，顯示為「Oct-26」，容易誤讀成 10 月 26 日 | Excel 實際開啟   | 先改測試，月份改寫為「2026年10月」（commit `5de55e7`）                              |
-| 3   | 同一冷藏櫃同一量測時間換流水號重送（韌體重開機常見）會寫成第二筆，度分鐘從 12.0 變成 24.0 | 外部 code review | 先寫失敗測試；`(cabinet_id, measured_at)` 加唯一索引並計為重複（commit `6ac4cbb`）  |
-| 4   | 伺服器自己停機超過 15 分鐘，重啟後所有冷藏櫃同時判定斷線並發出通知                        | 外部 code review | 先寫失敗測試；改以最後量測時間與服務啟動時間較晚者起算（commit `865c4f8`）          |
-| 5   | 前端打包成單一 883 kB 檔案（gzip 288 kB）                                                 | 外部 code review | 頁面與圖表拆成按需載入的 chunk，首屏約 315 kB（gzip 約 101 kB）（commit `3f6ab27`） |
+| #   | 缺陷                                                                                      | 發現方式                     | 處置                                                                                    |
+| --- | ----------------------------------------------------------------------------------------- | ---------------------------- | --------------------------------------------------------------------------------------- |
+| 1   | 從未回報過的冷藏櫃在綁定後第 14 分鐘就判定斷線，與「超過 15 分鐘」的規則不一致            | Code review                  | 先寫失敗測試，改以綁定時間起算（commit `0947ac4`）                                      |
+| 2   | 月報 CSV 的月份 `2026-10` 被 Excel 自動轉成日期，顯示為「Oct-26」，容易誤讀成 10 月 26 日 | Excel 實際開啟               | 先改測試，月份改寫為「2026年10月」（commit `5de55e7`）                                  |
+| 3   | 同一冷藏櫃同一量測時間換流水號重送（韌體重開機常見）會寫成第二筆，度分鐘從 12.0 變成 24.0 | 外部 code review             | 先寫失敗測試；`(cabinet_id, measured_at)` 加唯一索引並計為重複（commit `6ac4cbb`）      |
+| 4   | 伺服器自己停機超過 15 分鐘，重啟後所有冷藏櫃同時判定斷線並發出通知                        | 外部 code review             | 先寫失敗測試；改以最後量測時間與服務啟動時間較晚者起算（commit `865c4f8`）              |
+| 5   | 前端打包成單一 883 kB 檔案（gzip 288 kB）                                                 | 外部 code review             | 頁面與圖表拆成按需載入的 chunk，首屏約 315 kB（gzip 約 101 kB）（commit `3f6ab27`）     |
+| 6   | 補傳的正常讀值填進 ≤ 2 分鐘的缺口、把事件切成兩段都不足 10 分鐘時，事件不會被撤銷         | 撰寫教學文件時推導對帳正確性 | 先寫失敗測試；對帳改為雙向，撤銷（RETRACTED）或改由仍成立的區段承接（commit `1299291`） |
 
 開發過程中另以畫面與資料庫檢查發現並修正：範例資料的斷線長度因批次送出而多算 4 分鐘、
 範例資料綁定起點早於資料起點導致完整率失真（87%）。這兩項都是範例資料產生方式的問題，不是判定邏輯的錯誤。
@@ -299,10 +300,14 @@ npm run simulator -- --api http://localhost:3100 --duration 150m --incident-afte
 - detectExcursionRuns 輸入順序不影響結果（補傳亂序）
 - detectExcursionRuns 連續段中缺資料 ≤ 2 分鐘仍視為連續，但缺口不累計度分鐘
 
-**`apps/server/src/modules/events/excursion-reconciler.test.ts`**（8）
+**`apps/server/src/modules/events/excursion-reconciler.test.ts`**（12）
 
 - ExcursionReconciler（經由 ReadingPipeline） 其他冷藏櫃的資料不影響本櫃事件
 - ExcursionReconciler（經由 ReadingPipeline） 即時資料：第 10 分鐘成立、回到範圍時結束，各一則通知
+- ExcursionReconciler（經由 ReadingPipeline） 補傳的正常讀值把連續段切短（撤銷與縮短） 切開後兩段都不足 10 分鐘 → 事件撤銷，撤銷通知只有一則
+- ExcursionReconciler（經由 ReadingPipeline） 補傳的正常讀值把連續段切短（撤銷與縮短） 切開後仍有一段達 10 分鐘 → 事件縮短為該段，不撤銷也不新增
+- ExcursionReconciler（經由 ReadingPipeline） 補傳的正常讀值把連續段切短（撤銷與縮短） 進行中的事件被切短到不成立 → 撤銷
+- ExcursionReconciler（經由 ReadingPipeline） 補傳的正常讀值把連續段切短（撤銷與縮短） 事件結束後繼續送正常資料，不會被誤判為孤兒而撤銷
 - ExcursionReconciler（經由 ReadingPipeline） 同一時間點換流水號重送，累積超標度分鐘與持續時間不變
 - ExcursionReconciler（經由 ReadingPipeline） 同一批資料不論重送幾次，「事件成立」通知只有一則
 - ExcursionReconciler（經由 ReadingPipeline） 補傳出已結束的歷史事件：標記為補傳，成立與結束通知各一則
@@ -310,10 +315,11 @@ npm run simulator -- --api http://localhost:3100 --duration 150m --incident-afte
 - ExcursionReconciler（經由 ReadingPipeline） 補傳更早的超標資料，事件往前延長而不是新增
 - ExcursionReconciler（經由 ReadingPipeline） 超標 9 分鐘後回到範圍，不產生事件也不發通知
 
-**`apps/server/src/modules/events/offline-service.test.ts`**（10）
+**`apps/server/src/modules/events/offline-service.test.ts`**（11）
 
 - OfflineService 從未回報的冷藏櫃，自綁定起超過 15 分鐘才判斷線
 - OfflineService 恢復連線後的補傳判定（斷線 2 小時） 只送即時資料 → 資料不完整；之後補傳完成 → 已補齊
+- OfflineService 恢復連線後的補傳判定（斷線 2 小時） 補傳的超標事件之後被撤銷 → 解除關聯，斷線事件改判為已補齊、溫度正常
 - OfflineService 恢復連線後的補傳判定（斷線 2 小時） 補傳資料全部正常 → 已補齊、溫度正常
 - OfflineService 恢復連線後的補傳判定（斷線 2 小時） 補傳資料含 30 分鐘超標 → 產生時間正確的異常事件並互相關聯
 - OfflineService 恢復連線後的補傳判定（斷線 2 小時） 補傳順序（新到舊、分批）不影響最終結果
@@ -342,13 +348,14 @@ npm run simulator -- --api http://localhost:3100 --duration 150m --incident-afte
 - toCsv 以 UTF-8 BOM 開頭、CRLF 換行（Excel 開啟中文不亂碼）
 - toCsv 含逗號、引號、換行的欄位加引號並跳脫
 
-**`apps/server/src/modules/reports/report-service.test.ts`**（5）
+**`apps/server/src/modules/reports/report-service.test.ts`**（6）
 
 - 月報 CSV 列出摘要與事件清單
 - 月報 computeRates：手算範例（設計文件 §9.2）
 - 月報 整月：44,640 應有分鐘、44,000 有資料、其中 220 分鐘超標
 - 月報 月份邊界以台灣時間切分，月外資料不計入
 - 月報 當月未結束只算到現在；綁定前的時間不列入應有分鐘
+- 月報 已撤銷的溫度異常事件不計入事件數與累積度分鐘，但仍列在事件清單
 
 **`apps/server/src/realtime/retention.test.ts`**（1）
 

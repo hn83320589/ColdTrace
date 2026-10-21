@@ -51,7 +51,7 @@
 ```bash
 npm install
 npm run dev          # 後端 + 前端 + 正常情境模擬器，開 http://localhost:5173
-npm test             # 97 個測試
+npm test             # 103 個測試
 ```
 
 加速展示（1 秒 = 1 分鐘），可在幾分鐘內看到「斷線 2 小時後補傳」的完整過程：

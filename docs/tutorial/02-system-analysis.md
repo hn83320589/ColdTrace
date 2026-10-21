@@ -140,7 +140,10 @@ stateDiagram-v2
     CLOSED --> OPEN : 補傳填滿缺口，<br/>顯示其實仍在超標
     OPEN --> MERGED : 補傳把兩段接起來，<br/>併入較早的事件
     CLOSED --> MERGED : 同上
+    OPEN --> RETRACTED : 補傳的正常讀值把它切成<br/>都不足 10 分鐘的段落
+    CLOSED --> RETRACTED : 同上
     MERGED --> [*]
+    RETRACTED --> [*]
 ```
 
 ### 斷線事件
