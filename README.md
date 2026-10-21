@@ -8,6 +8,8 @@
 
 ![儀表板](docs/screenshots/dashboard.png)
 
+> 📘 想了解這個系統是怎麼從題目一步步設計出來的？見 **[教學文件](docs/tutorial/README.md)**。
+
 ---
 
 ## 快速開始
@@ -189,6 +191,7 @@ apps/server/         Fastify 後端
 apps/web/            React 前端
 apps/simulator/      裝置模擬器 CLI
 docs/design.md       系統分析與架構設計文件
+docs/tutorial/       教學文件（需求分析 → 系統分析 → 架構 → 選型 → 程式 → 核心演算法 → 測試）
 ```
 
 ---
