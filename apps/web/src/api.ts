@@ -56,6 +56,7 @@ export interface DeviceRow {
   id: string;
   model: string | null;
   lastSeq: number | null;
+  lastMeasuredAt: number | null;
   cabinetId: string | null;
 }
 

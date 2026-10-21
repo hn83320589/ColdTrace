@@ -75,6 +75,9 @@ export function registerRoutes(app: FastifyInstance, s: Services): void {
       s.db,
       `SELECT d.id, d.model,
          (SELECT MAX(seq) FROM readings r WHERE r.device_id = d.id) AS lastSeq,
+         -- 流水號隨時間遞增，取最大流水號的量測時間即可走主鍵索引
+         (SELECT measured_at FROM readings r WHERE r.device_id = d.id ORDER BY seq DESC LIMIT 1)
+           AS lastMeasuredAt,
          (SELECT cabinet_id FROM bindings b WHERE b.device_id = d.id AND b.bound_to IS NULL) AS cabinetId
        FROM devices d ORDER BY d.id`,
     ),

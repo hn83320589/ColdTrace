@@ -3,13 +3,20 @@ import { MINUTE_MS } from './time';
 /**
  * 溫度情境（模擬器與範例資料共用）。start 為 epoch 毫秒。
  * - door-open：開門短暫升溫，正弦曲線升到 peak 後回落
- * - compressor-failure：每分鐘緩升 0.1°C 到 peak 並維持，durationMin 後修復、每分鐘降 0.25°C
+ * - compressor-failure：每分鐘緩升（預設 0.1°C）到 peak 並維持，durationMin 後修復、每分鐘降 0.25°C
  * - freeze：每分鐘降 0.15°C 到 low 並維持，durationMin 後回升
  * - plateau：在 durationMin 期間固定於 value 附近（用於精準控制超標時長）
  */
 export type Incident =
   | { kind: 'door-open'; start: number; durationMin: number; peak: number }
-  | { kind: 'compressor-failure'; start: number; durationMin: number; peak: number }
+  | {
+      kind: 'compressor-failure';
+      start: number;
+      durationMin: number;
+      peak: number;
+      /** 每分鐘升溫幅度，預設 0.1°C */
+      risePerMin?: number;
+    }
   | { kind: 'freeze'; start: number; durationMin: number; low: number }
   | { kind: 'plateau'; start: number; durationMin: number; value: number };
 
@@ -45,7 +52,8 @@ export function incidentTemperature(
     case 'plateau':
       return m < d ? incident.value : null;
     case 'compressor-failure': {
-      const reached = Math.min(incident.peak, baseline + RISE_PER_MIN * Math.min(m, d));
+      const rise = incident.risePerMin ?? RISE_PER_MIN;
+      const reached = Math.min(incident.peak, baseline + rise * Math.min(m, d));
       if (m < d) return reached;
       const recovered = reached - RECOVER_PER_MIN * (m - d);
       return recovered > baseline ? recovered : null;
