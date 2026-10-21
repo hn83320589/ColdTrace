@@ -380,7 +380,7 @@ npm run acceptance -- http://localhost:3200   # 黑箱驗收（對執行中的�
 | 11  | 1,440 點 1 秒內繪製                        | 面板顯示繪製耗時，實測 4–6 ms                                                                      |
 | 12  | 合規率、完整率手算一致；CSV 中文不亂碼     | `report-service.test.ts`、`csv.test.ts`                                                            |
 | 13  | 16 台 30 分鐘無錯誤、判定符合情境          | 真實時間實測：上傳 438 筆、錯誤 0、後端錯誤 0，14 台 ✅、2 台斷線中 ⏳（2 小時後才補傳，符合情境） |
-| 14  | ≥ 30 個單元測試、lint 無錯誤               | 90 個測試；CI 執行 lint / typecheck / test / build                                                 |
+| 14  | ≥ 30 個單元測試、lint 無錯誤               | 97 個測試；CI 執行 lint / typecheck / test / build                                                 |
 
 CI：GitHub Actions 於 Node 22 與 24 執行 lint、format check、typecheck、test、build（`.github/workflows/ci.yml`）。
 
@@ -418,7 +418,7 @@ CI：GitHub Actions 於 Node 22 與 24 執行 lint、format check、typecheck、
 - **歷史綁定不可修改**：只能往未來更換溫度計，以保證已寫入資料的歸屬不變。
 - **無登入與權限**：依需求假設僅於診所內網使用，處置人為自由輸入文字。
 - **時區**：前端時間顯示固定為台灣時間；圖表橫軸刻度位置依瀏覽器時區計算（在台灣使用時無差異）。
-- **前端 bundle** 約 880 kB（主要為 ECharts），內網使用未做拆分。
+- **首屏仍含 zod**（約 80 kB）：`@coldtrace/shared` 的單一入口同時匯出驗證 schema；要移出需改為 subpath exports。
 
 ## 授權
 
