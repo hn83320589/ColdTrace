@@ -90,7 +90,8 @@ describe('月報', () => {
     const report = s.reports.monthly('2026-10', NOV + DAY_MS);
 
     const summary = s.reports.summaryCsv(report).split('\r\n');
-    expect(summary[1]).toContain('台北分院,疫苗冷藏櫃 A,C01,44640,60,45');
+    // 月份寫成「2026年10月」：「2026-10」會被 Excel 轉成日期並顯示為 Oct-26
+    expect(summary[1]).toMatch(/^2026年10月,台北分院,疫苗冷藏櫃 A,C01,44640,60,45/);
     const events = s.reports.eventsCsv(report).split('\r\n');
     expect(events[1]).toContain(
       '溫度異常,台北分院,疫苗冷藏櫃 A,2026-10-01 00:10,2026-10-01 00:25,15',

@@ -37,6 +37,12 @@ export function computeRates(c: MinuteCounts): {
   };
 }
 
+/** 「2026-10」會被 Excel 自動轉成日期（顯示為 Oct-26），改用「2026年10月」保持文字 */
+const monthLabel = (month: string) => {
+  const [year, m] = month.split('-');
+  return `${year}年${Number(m)}月`;
+};
+
 const round2 = (rate: number | null) => (rate === null ? null : Math.round(rate * 10000) / 100);
 
 export class ReportService {
@@ -125,7 +131,7 @@ export class ReportService {
         const degreeMinutes =
           excursions.reduce((sum, e) => sum + (e.degreeMinutesX10 ?? 0), 0) / 10;
         return [
-          report.month,
+          monthLabel(report.month),
           c.branchName,
           c.cabinetName,
           c.cabinetId,
