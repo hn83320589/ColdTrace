@@ -354,22 +354,22 @@ npm test
 
 ### 驗收標準對照
 
-| #   | 標準                                       | 驗證方式                                                         |
-| --- | ------------------------------------------ | ---------------------------------------------------------------- |
-| 1   | `npm install` + 一個指令啟動並載入範例資料 | `npm run dev`；`seed/seed.test.ts`                               |
-| 2   | 重送 3 次筆數不變                          | `ingestion.test.ts`「同一批資料重送 3 次」                       |
-| 3   | 75 小時前資料拒收並列出筆數與流水號        | `ingestion.test.ts`「75 小時前的資料被拒收」                     |
-| 4   | 超標 9 分鐘不成立、10 分鐘成立             | `excursion-detector.test.ts`、`excursion-reconciler.test.ts`     |
-| 5   | 累積超標度分鐘與手算一致                   | `excursion-detector.test.ts`「累積超標度分鐘與手算一致」（10.3） |
-| 6   | 更換溫度計後資料歸屬正確                   | `assets.test.ts`、`app.test.ts`「更換溫度計 API」                |
-| 7   | 停止送資料 15 分鐘產生斷線、儀表板顯示斷線 | `offline-service.test.ts`；畫面實測                              |
-| 8   | 斷線 2 小時補傳含 30 分鐘超標              | `offline-service.test.ts`；模擬器加速實測（見上方輸出）          |
-| 9   | 「事件成立」通知只有一則                   | `excursion-reconciler.test.ts`「不論重送幾次」                   |
-| 10  | 不重新整理看到 正常 → 異常 → 正常          | 畫面實測（WebSocket 更新 React Query 快取）                      |
-| 11  | 1,440 點 1 秒內繪製                        | 面板顯示繪製耗時，實測 4–6 ms                                    |
-| 12  | 合規率、完整率手算一致；CSV 中文不亂碼     | `report-service.test.ts`、`csv.test.ts`                          |
-| 13  | 16 台 30 分鐘無錯誤、判定符合情境          | 模擬器 `--duration 30m` 結束時自動驗證                           |
-| 14  | ≥ 30 個單元測試、lint 無錯誤               | 90 個測試；CI 執行 lint / typecheck / test / build               |
+| #   | 標準                                       | 驗證方式                                                                                           |
+| --- | ------------------------------------------ | -------------------------------------------------------------------------------------------------- |
+| 1   | `npm install` + 一個指令啟動並載入範例資料 | `npm run dev`；`seed/seed.test.ts`                                                                 |
+| 2   | 重送 3 次筆數不變                          | `ingestion.test.ts`「同一批資料重送 3 次」                                                         |
+| 3   | 75 小時前資料拒收並列出筆數與流水號        | `ingestion.test.ts`「75 小時前的資料被拒收」                                                       |
+| 4   | 超標 9 分鐘不成立、10 分鐘成立             | `excursion-detector.test.ts`、`excursion-reconciler.test.ts`                                       |
+| 5   | 累積超標度分鐘與手算一致                   | `excursion-detector.test.ts`「累積超標度分鐘與手算一致」（10.3）                                   |
+| 6   | 更換溫度計後資料歸屬正確                   | `assets.test.ts`、`app.test.ts`「更換溫度計 API」                                                  |
+| 7   | 停止送資料 15 分鐘產生斷線、儀表板顯示斷線 | `offline-service.test.ts`；畫面實測                                                                |
+| 8   | 斷線 2 小時補傳含 30 分鐘超標              | `offline-service.test.ts`；模擬器加速實測（見上方輸出）                                            |
+| 9   | 「事件成立」通知只有一則                   | `excursion-reconciler.test.ts`「不論重送幾次」                                                     |
+| 10  | 不重新整理看到 正常 → 異常 → 正常          | 畫面實測（WebSocket 更新 React Query 快取）                                                        |
+| 11  | 1,440 點 1 秒內繪製                        | 面板顯示繪製耗時，實測 4–6 ms                                                                      |
+| 12  | 合規率、完整率手算一致；CSV 中文不亂碼     | `report-service.test.ts`、`csv.test.ts`                                                            |
+| 13  | 16 台 30 分鐘無錯誤、判定符合情境          | 真實時間實測：上傳 438 筆、錯誤 0、後端錯誤 0，14 台 ✅、2 台斷線中 ⏳（2 小時後才補傳，符合情境） |
+| 14  | ≥ 30 個單元測試、lint 無錯誤               | 90 個測試；CI 執行 lint / typecheck / test / build                                                 |
 
 CI：GitHub Actions 於 Node 22 與 24 執行 lint、format check、typecheck、test、build（`.github/workflows/ci.yml`）。
 
