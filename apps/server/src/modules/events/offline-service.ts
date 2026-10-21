@@ -33,10 +33,12 @@ export class OfflineService implements AfterIngestHook {
         const cabinetId = binding.cabinetId;
         if (this.openEvent(cabinetId)) continue;
 
-        const lastSeen = this.latestMeasuredAt(cabinetId) ?? binding.boundFrom - SAMPLE_INTERVAL_MS;
-        if (now - lastSeen <= OFFLINE_THRESHOLD_MS) continue;
+        // 從未回報的冷藏櫃，以綁定開始時間起算
+        const lastSeen = this.latestMeasuredAt(cabinetId);
+        const silentSince = lastSeen ?? binding.boundFrom;
+        if (now - silentSince <= OFFLINE_THRESHOLD_MS) continue;
 
-        const startedAt = lastSeen + SAMPLE_INTERVAL_MS;
+        const startedAt = lastSeen === null ? binding.boundFrom : lastSeen + SAMPLE_INTERVAL_MS;
         const { lastId } = run(
           this.db,
           `INSERT INTO events (cabinet_id, type, status, started_at, detected_at)

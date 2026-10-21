@@ -52,6 +52,19 @@ describe('OfflineService', () => {
     expect(ctx.notifications.countFor(event!.id, 'OFFLINE_STARTED')).toBe(1);
   });
 
+  it('從未回報的冷藏櫃，自綁定起超過 15 分鐘才判斷線', () => {
+    ctx.assets.createCabinet({ id: 'C03', branchId: 'B01', name: '新櫃' });
+    ctx.assets.createDevice({ id: 'TM-03' }, T0);
+    ctx.assets.bindDevice('TM-03', 'C03', at(100));
+    const offlineOfC03 = () =>
+      all<EventRow>(ctx.db, `SELECT * FROM events WHERE cabinet_id = 'C03'`);
+
+    ctx.offline.scan(at(115));
+    expect(offlineOfC03()).toHaveLength(0);
+    ctx.offline.scan(at(115) + SECOND_MS);
+    expect(offlineOfC03()).toMatchObject([{ type: 'OFFLINE', started_at: at(100) }]);
+  });
+
   it('沒有綁定中裝置的冷藏櫃不判斷線', () => {
     ctx.assets.createCabinet({ id: 'C03', branchId: 'B01', name: '未啟用' });
     ctx.clock.set(at(60));
